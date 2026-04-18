@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Writeups | Natan Santos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:      #0a0c0f;
+      --bg2:     #0f1217;
+      --bg3:     #141820;
+      --border:  #1e2530;
+      --accent:  #00e5a0;
+      --acc2:    #00b37a;
+      --red:     #ff4d6a;
+      --yellow:  #f5c518;
+      --blue:    #4d9fff;
+      --purple:  #a78bfa;
+      --text:    #c8d0dc;
+      --muted:   #5a6475;
+      --white:   #edf1f7;
+      --mono:    'Space Mono', monospace;
+      --sans:    'Syne', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 14px;
+      line-height: 1.75;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 999; opacity: .5;
+    }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--acc2); border-radius: 2px; }
+
+    .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(10,12,15,.88);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: 960px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px;
+    }
+    .nav-logo {
+      font-family: var(--sans); font-weight: 800; font-size: 18px;
+      color: var(--white); text-decoration: none; letter-spacing: -0.5px;
+    }
+    .nav-logo span { color: var(--accent); }
+    .nav-links { display: flex; gap: 28px; list-style: none; align-items: center; }
+    .nav-links a {
+      color: var(--muted); text-decoration: none;
+      font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+      transition: color .2s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--accent); }
+
+    /* HERO */
+    .page-hero {
+      padding: 140px 0 64px;
+      position: relative; overflow: hidden;
+      border-bottom: 1px solid var(--border);
+    }
+    .grid-bg {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,229,160,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,229,160,.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      mask-image: radial-gradient(ellipse 100% 100% at 0% 0%, black 20%, transparent 70%);
+    }
+    .hero-content { position: relative; z-index: 1; }
+    .page-label {
+      font-size: 11px; letter-spacing: .15em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 12px;
+    }
+    .page-title {
+      font-family: var(--sans); font-weight: 800;
+      font-size: clamp(36px, 6vw, 64px);
+      color: var(--white); letter-spacing: -2px;
+      line-height: .95; margin-bottom: 20px;
+    }
+    .page-title span { color: var(--accent); }
+    .page-desc { color: var(--muted); font-size: 13px; max-width: 520px; line-height: 1.85; }
+
+    /* STATS BAR */
+    .stats-bar {
+      display: flex; gap: 0;
+      border: 1px solid var(--border);
+      margin-top: 40px;
+      overflow: hidden;
+    }
+    .stat {
+      flex: 1; padding: 16px 20px;
+      border-right: 1px solid var(--border);
+      background: var(--bg2);
+    }
+    .stat:last-child { border-right: none; }
+    .stat-num {
+      font-family: var(--sans); font-weight: 800;
+      font-size: 24px; color: var(--white);
+      letter-spacing: -1px;
+    }
+    .stat-num span { color: var(--accent); }
+    .stat-label { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+
+    /* FILTER BAR */
+    .filter-bar {
+      padding: 32px 0 0;
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .filter-label { font-size: 11px; color: var(--muted); margin-right: 4px; letter-spacing: .08em; text-transform: uppercase; }
+    .filter-btn {
+      background: var(--bg2); border: 1px solid var(--border);
+      color: var(--muted); font-family: var(--mono); font-size: 11px;
+      padding: 6px 14px; border-radius: 2px; cursor: pointer;
+      letter-spacing: .08em; text-transform: uppercase;
+      transition: all .15s;
+    }
+    .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 700; }
+
+    /* CATEGORY COLOR VARS */
+    .cat-research  { --cat: var(--red);    }
+    .cat-htb       { --cat: var(--yellow); }
+    .cat-thm       { --cat: var(--blue);   }
+    .cat-oscp      { --cat: var(--purple); }
+
+    /* WRITEUPS GRID */
+    .writeups-section { padding: 48px 0 100px; }
+    .section-group-label {
+      font-size: 11px; letter-spacing: .15em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 16px; margin-top: 48px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .section-group-label::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+    .writeups-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 2px;
+    }
+
+    /* CARD */
+    .card {
+      background: var(--bg2); border: 1px solid var(--border);
+      padding: 24px; position: relative;
+      transition: border-color .2s, transform .2s;
+      text-decoration: none; display: block;
+      cursor: pointer;
+    }
+    .card:hover { border-color: var(--cat, var(--accent)); transform: translateY(-2px); }
+    .card::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px; background: var(--cat, var(--accent)); opacity: 0;
+      transition: opacity .2s;
+    }
+    .card:hover::before { opacity: 1; }
+
+    .card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .card-platform {
+      font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--cat, var(--accent));
+      background: color-mix(in srgb, var(--cat, var(--accent)) 10%, transparent);
+      border: 1px solid color-mix(in srgb, var(--cat, var(--accent)) 25%, transparent);
+      padding: 3px 10px; border-radius: 2px;
+    }
+    .card-diff {
+      font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+      color: var(--muted); padding: 3px 10px;
+      background: var(--bg3); border: 1px solid var(--border); border-radius: 2px;
+    }
+    .card-diff.easy   { color: var(--accent); }
+    .card-diff.medium { color: var(--yellow); }
+    .card-diff.hard   { color: var(--red);    }
+    .card-diff.insane { color: var(--purple); }
+
+    .card-title {
+      font-family: var(--sans); font-weight: 700; font-size: 17px;
+      color: var(--white); margin-bottom: 8px; line-height: 1.2;
+    }
+    .card-desc { font-size: 12px; color: var(--muted); line-height: 1.7; margin-bottom: 16px; }
+    .card-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .ctag {
+      font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
+      padding: 2px 8px; border-radius: 2px;
+      background: var(--bg3); border: 1px solid var(--border); color: var(--muted);
+    }
+    .card-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border);
+      font-size: 11px; color: var(--muted);
+    }
+    .card-arrow { color: var(--cat, var(--accent)); font-size: 14px; transition: transform .2s; }
+    .card:hover .card-arrow { transform: translateX(4px); }
+
+    /* PLACEHOLDER CARD */
+    .card-placeholder {
+      background: var(--bg2); border: 1px dashed var(--border);
+      padding: 24px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 180px; text-align: center; gap: 10px;
+    }
+    .placeholder-icon { font-size: 28px; opacity: .2; }
+    .placeholder-text { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--border); }
+
+    /* HIDDEN */
+    .card[data-hidden="true"],
+    .card-placeholder[data-hidden="true"] { display: none; }
+
+    /* BACK LINK */
+    .back-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      color: var(--muted); text-decoration: none; font-size: 12px;
+      letter-spacing: .08em; text-transform: uppercase;
+      transition: color .2s; margin-top: 4px;
+    }
+    .back-link:hover { color: var(--accent); }
+
+    .reveal { opacity: 0; transform: translateY(16px); transition: opacity .5s ease, transform .5s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      .stats-bar { flex-direction: column; }
+      .stat { border-right: none; border-bottom: 1px solid var(--border); }
+      .stat:last-child { border-bottom: none; }
+      .writeups-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">natan<span>.sec</span></a>
+    <ul class="nav-links">
+      <li><a href="../index.html#experience">Experience</a></li>
+      <li><a href="../index.html#skills">Skills</a></li>
+      <li><a href="../index.html#highlights">Highlights</a></li>
+      <li><a href="../index.html#certs">Certs</a></li>
+      <li><a href="index.html" class="active">Writeups</a></li>
+      <li><a href="../index.html#contact">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="page-hero">
+  <div class="grid-bg"></div>
+  <div class="container hero-content">
+    <a href="../index.html" class="back-link reveal">← back to portfolio</a>
+    <p class="page-label reveal" style="margin-top:20px;">// research · ctf · lab</p>
+    <h1 class="page-title reveal">Write<span>ups</span></h1>
+    <p class="page-desc reveal">
+      Original research, HTB and TryHackMe machine walkthroughs, and OSCP prep notes.
+      Focused on what actually teaches something — not just flag hunting.
+    </p>
+
+    <div class="stats-bar reveal">
+      <div class="stat">
+        <p class="stat-num"><span id="count-research">1</span></p>
+        <p class="stat-label">Research</p>
+      </div>
+      <div class="stat">
+        <p class="stat-num"><span id="count-htb">0</span></p>
+        <p class="stat-label">HackTheBox</p>
+      </div>
+      <div class="stat">
+        <p class="stat-num"><span id="count-thm">1</span></p>
+        <p class="stat-label">TryHackMe</p>
+      </div>
+      <div class="stat">
+        <p class="stat-num"><span id="count-oscp">0</span></p>
+        <p class="stat-label">OSCP Journey</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FILTER + CONTENT -->
+<div class="writeups-section">
+  <div class="container">
+
+    <div class="filter-bar reveal">
+      <span class="filter-label">filter:</span>
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="research">Research</button>
+      <button class="filter-btn" data-filter="htb">HackTheBox</button>
+      <button class="filter-btn" data-filter="thm">TryHackMe</button>
+      <button class="filter-btn" data-filter="oscp">OSCP Journey</button>
+    </div>
+
+    <!-- ══ RESEARCH ══ -->
+    <p class="section-group-label reveal" data-group="research">Research</p>
+    <div class="writeups-grid" id="grid-research">
+
+      <a class="card cat-research reveal" data-category="research" href="https://github.com/natanOds/dot1x-macsec-bypass" target="_blank" rel="noopener">
+        <div class="card-top">
+          <span class="card-platform">Research</span>
+          <span class="card-diff">Network / L2</span>
+        </div>
+        <p class="card-title">Bypassing 802.1X & Downgrading MACsec via MKPDU Suppression</p>
+        <p class="card-desc">
+          Practical exploration of 802.1X port security bypass and MACsec downgrade
+          through MKPDU suppression on Cisco switches. Covers attack setup,
+          tooling, and detection gaps.
+        </p>
+        <div class="card-tags">
+          <span class="ctag">802.1X</span>
+          <span class="ctag">MACsec</span>
+          <span class="ctag">Cisco</span>
+          <span class="ctag">Network Pentest</span>
+          <span class="ctag">MKPDU</span>
+        </div>
+        <div class="card-footer">
+          <span>Original Research</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!--
+        ══ HOW TO ADD A NEW RESEARCH WRITEUP ══
+        Copy the block above, change href to your writeup URL (GitHub, blog, etc.)
+        and update all fields. Remove the onclick="return false;" when you have a real link.
+      -->
+
+    </div>
+
+    <!-- ══ HACKTHEBOX ══ -->
+    <p class="section-group-label reveal" data-group="htb">HackTheBox</p>
+    <div class="writeups-grid" id="grid-htb">
+
+      <div class="card-placeholder reveal" data-category="htb">
+        <div class="placeholder-icon">⬡</div>
+        <p class="placeholder-text">HTB writeups coming soon</p>
+      </div>
+
+      <!--
+        ══ HOW TO ADD AN HTB WRITEUP ══
+        <a class="card cat-htb reveal" data-category="htb" href="YOUR_URL">
+          <div class="card-top">
+            <span class="card-platform">HackTheBox</span>
+            <span class="card-diff medium">Medium</span>   ← easy / medium / hard / insane
+          </div>
+          <p class="card-title">Machine Name</p>
+          <p class="card-desc">Brief description of what makes this machine interesting.</p>
+          <div class="card-tags">
+            <span class="ctag">Active Directory</span>
+            <span class="ctag">Kerberoasting</span>
+          </div>
+          <div class="card-footer">
+            <span>Retired · Jan 2025</span>
+            <span class="card-arrow">→</span>
+          </div>
+        </a>
+      -->
+
+    </div>
+
+    <!-- ══ TRYHACKME ══ -->
+    <p class="section-group-label reveal" data-group="thm">TryHackMe</p>
+    <div class="writeups-grid" id="grid-thm">
+
+      <a class="card cat-thm reveal" data-category="thm" href="attacktive-directory/index.html">
+        <div class="card-top">
+          <span class="card-platform">TryHackMe</span>
+          <span class="card-diff medium">Medium</span>
+        </div>
+        <p class="card-title">Attacktive Directory</p>
+        <p class="card-desc">
+          Full Active Directory exploitation path — Kerberos enumeration,
+          AS-REP Roasting, SMB abuse, and domain compromise via secretsdump.
+        </p>
+        <div class="card-tags">
+          <span class="ctag">Active Directory</span>
+          <span class="ctag">AS-REP Roast</span>
+          <span class="ctag">Kerberos</span>
+          <span class="ctag">Impacket</span>
+          <span class="ctag">DCSync</span>
+        </div>
+        <div class="card-footer">
+          <span>TryHackMe · Room</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!--
+        ══ HOW TO ADD A THM WRITEUP ══
+        Same structure as HTB above, but use class="card cat-thm" and data-category="thm"
+        and <span class="card-platform">TryHackMe</span>
+      -->
+
+    </div>
+
+    <!-- ══ OSCP JOURNEY ══ -->
+    <p class="section-group-label reveal" data-group="oscp">OSCP Journey</p>
+    <div class="writeups-grid" id="grid-oscp">
+
+      <div class="card-placeholder reveal" data-category="oscp">
+        <div class="placeholder-icon">🎯</div>
+        <p class="placeholder-text">OSCP prep notes coming soon</p>
+      </div>
+
+      <!--
+        ══ HOW TO ADD AN OSCP NOTE ══
+        Same structure, use class="card cat-oscp" and data-category="oscp"
+        Good for: technique notes, PG Practice machines, methodology posts
+      -->
+
+    </div>
+
+  </div>
+</div>
+
+<footer style="border-top:1px solid var(--border);padding:28px 24px;text-align:center;font-size:11px;color:var(--muted);">
+  <p>Natan Oliveira dos Santos · <span style="color:var(--accent)">Senior Offensive Security Engineer</span> · Brazil 🇧🇷</p>
+</footer>
+
+<script>
+  // ── Scroll reveal ──
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.06 });
+  document.querySelectorAll('.reveal').forEach((el, i) => {
+    el.style.transitionDelay = `${(i % 8) * 0.06}s`;
+    io.observe(el);
+  });
+
+  // ── Filter ──
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const allCards   = document.querySelectorAll('.card, .card-placeholder');
+  const allGroups  = document.querySelectorAll('.section-group-label');
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const f = btn.dataset.filter;
+
+      allCards.forEach(c => {
+        c.dataset.hidden = (f !== 'all' && c.dataset.category !== f) ? 'true' : 'false';
+      });
+
+      allGroups.forEach(g => {
+        const group = g.dataset.group;
+        const grid  = document.getElementById('grid-' + group);
+        const visible = grid && [...grid.children].some(c => c.dataset.hidden !== 'true');
+        g.style.display = (f !== 'all' && !visible) ? 'none' : '';
+        if (grid) grid.style.display = (f !== 'all' && !visible) ? 'none' : '';
+      });
+    });
+  });
+
+  // ── Live counts (counts only real cards, not placeholders) ──
+  ['research','htb','thm','oscp'].forEach(cat => {
+    const grid = document.getElementById('grid-' + cat);
+    if (!grid) return;
+    const real = [...grid.querySelectorAll('.card')].length;
+    const el = document.getElementById('count-' + cat);
+    if (el) el.textContent = real;
+  });
+</script>
+</body>
+</html>

