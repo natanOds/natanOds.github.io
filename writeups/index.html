@@ -19,6 +19,7 @@
       --yellow:  #f5c518;
       --blue:    #4d9fff;
       --purple:  #a78bfa;
+      --orange:  #ff8c42;
       --text:    #c8d0dc;
       --muted:   #5a6475;
       --white:   #edf1f7;
@@ -142,6 +143,7 @@
     .cat-htb       { --cat: var(--yellow); }
     .cat-thm       { --cat: var(--blue);   }
     .cat-oscp      { --cat: var(--purple); }
+    .cat-tools     { --cat: var(--orange); }
 
     /* WRITEUPS GRID */
     .writeups-section { padding: 48px 0 100px; }
@@ -192,6 +194,7 @@
     .card-diff.medium { color: var(--yellow); }
     .card-diff.hard   { color: var(--red);    }
     .card-diff.insane { color: var(--purple); }
+    .card-diff.tool   { color: var(--orange); }
 
     .card-title {
       font-family: var(--sans); font-weight: 700; font-size: 17px;
@@ -211,6 +214,24 @@
     }
     .card-arrow { color: var(--cat, var(--accent)); font-size: 14px; transition: transform .2s; }
     .card:hover .card-arrow { transform: translateX(4px); }
+
+    /* STATUS BADGE */
+    .card-status {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+      color: var(--muted);
+    }
+    .card-status.wip { color: var(--yellow); }
+    .card-status.wip::before {
+      content: ''; display: inline-block;
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--yellow);
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: .4; transform: scale(.7); }
+    }
 
     /* PLACEHOLDER CARD */
     .card-placeholder {
@@ -269,24 +290,28 @@
   <div class="grid-bg"></div>
   <div class="container hero-content">
     <a href="../index.html" class="back-link reveal">← back to portfolio</a>
-    <p class="page-label reveal" style="margin-top:20px;">// research · ctf · lab</p>
+    <p class="page-label reveal" style="margin-top:20px;">// research · tools · ctf · lab</p>
     <h1 class="page-title reveal">Write<span>ups</span></h1>
     <p class="page-desc reveal">
-      Original research, HTB and TryHackMe machine walkthroughs, and OSCP prep notes.
+      Original research, offensive tools, HTB and TryHackMe walkthroughs, and OSCP prep notes.
       Focused on what actually teaches something — not just flag hunting.
     </p>
 
     <div class="stats-bar reveal">
       <div class="stat">
-        <p class="stat-num"><span id="count-research">1</span></p>
+        <p class="stat-num"><span id="count-research">0</span></p>
         <p class="stat-label">Research</p>
+      </div>
+      <div class="stat">
+        <p class="stat-num"><span id="count-tools">0</span></p>
+        <p class="stat-label">Tools</p>
       </div>
       <div class="stat">
         <p class="stat-num"><span id="count-htb">0</span></p>
         <p class="stat-label">HackTheBox</p>
       </div>
       <div class="stat">
-        <p class="stat-num"><span id="count-thm">1</span></p>
+        <p class="stat-num"><span id="count-thm">0</span></p>
         <p class="stat-label">TryHackMe</p>
       </div>
       <div class="stat">
@@ -305,9 +330,43 @@
       <span class="filter-label">filter:</span>
       <button class="filter-btn active" data-filter="all">All</button>
       <button class="filter-btn" data-filter="research">Research</button>
+      <button class="filter-btn" data-filter="tools">Tools</button>
       <button class="filter-btn" data-filter="htb">HackTheBox</button>
       <button class="filter-btn" data-filter="thm">TryHackMe</button>
       <button class="filter-btn" data-filter="oscp">OSCP Journey</button>
+    </div>
+
+    <!-- ══ TOOLS ══ -->
+    <p class="section-group-label reveal" data-group="tools">Tools</p>
+    <div class="writeups-grid" id="grid-tools">
+
+      <div class="card cat-tools reveal" data-category="tools" style="cursor:default">
+        <div class="card-top">
+          <span class="card-platform">Tool</span>
+          <span class="card-diff tool">Offline · Browser</span>
+        </div>
+        <p class="card-title">Pentest Companion</p>
+        <p class="card-desc">
+          Scope-aware pentest checklist platform that runs entirely in the browser —
+          no backend, no installation, no telemetry. Generates tailored checklists
+          across Web, API, Infra, Cloud, Mobile, and Assumed Breach scenarios with
+          MITRE ATT&CK mapping, findings management, evidence screenshots,
+          and styled Word/PDF report export.
+        </p>
+        <div class="card-tags">
+          <span class="ctag">Offline</span>
+          <span class="ctag">165+ Checks</span>
+          <span class="ctag">MITRE ATT&CK</span>
+          <span class="ctag">Reporting</span>
+          <span class="ctag">Web · API · Infra</span>
+          <span class="ctag">Cloud · Mobile · AD</span>
+        </div>
+        <div class="card-footer">
+          <span class="card-status wip">In development</span>
+          <span style="font-size:11px;color:var(--muted)">Coming soon</span>
+        </div>
+      </div>
+
     </div>
 
     <!-- ══ RESEARCH ══ -->
@@ -338,12 +397,6 @@
         </div>
       </a>
 
-      <!--
-        ══ HOW TO ADD A NEW RESEARCH WRITEUP ══
-        Copy the block above, change href to your writeup URL (GitHub, blog, etc.)
-        and update all fields. Remove the onclick="return false;" when you have a real link.
-      -->
-
     </div>
 
     <!-- ══ HACKTHEBOX ══ -->
@@ -354,26 +407,6 @@
         <div class="placeholder-icon">⬡</div>
         <p class="placeholder-text">HTB writeups coming soon</p>
       </div>
-
-      <!--
-        ══ HOW TO ADD AN HTB WRITEUP ══
-        <a class="card cat-htb reveal" data-category="htb" href="YOUR_URL">
-          <div class="card-top">
-            <span class="card-platform">HackTheBox</span>
-            <span class="card-diff medium">Medium</span>   ← easy / medium / hard / insane
-          </div>
-          <p class="card-title">Machine Name</p>
-          <p class="card-desc">Brief description of what makes this machine interesting.</p>
-          <div class="card-tags">
-            <span class="ctag">Active Directory</span>
-            <span class="ctag">Kerberoasting</span>
-          </div>
-          <div class="card-footer">
-            <span>Retired · Jan 2025</span>
-            <span class="card-arrow">→</span>
-          </div>
-        </a>
-      -->
 
     </div>
 
@@ -404,12 +437,6 @@
         </div>
       </a>
 
-      <!--
-        ══ HOW TO ADD A THM WRITEUP ══
-        Same structure as HTB above, but use class="card cat-thm" and data-category="thm"
-        and <span class="card-platform">TryHackMe</span>
-      -->
-
     </div>
 
     <!-- ══ OSCP JOURNEY ══ -->
@@ -420,12 +447,6 @@
         <div class="placeholder-icon">🎯</div>
         <p class="placeholder-text">OSCP prep notes coming soon</p>
       </div>
-
-      <!--
-        ══ HOW TO ADD AN OSCP NOTE ══
-        Same structure, use class="card cat-oscp" and data-category="oscp"
-        Good for: technique notes, PG Practice machines, methodology posts
-      -->
 
     </div>
 
@@ -473,8 +494,8 @@
     });
   });
 
-  // ── Live counts (counts only real cards, not placeholders) ──
-  ['research','htb','thm','oscp'].forEach(cat => {
+  // ── Live counts (real cards only, not placeholders) ──
+  ['research','tools','htb','thm','oscp'].forEach(cat => {
     const grid = document.getElementById('grid-' + cat);
     if (!grid) return;
     const real = [...grid.querySelectorAll('.card')].length;
